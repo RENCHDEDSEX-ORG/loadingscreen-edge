@@ -89,7 +89,7 @@
       };
     }
     transitionCount++;
-    if (paused || document.hidden) slideAnimations.forEach(function (animation) { animation.pause(); });
+    if (paused) slideAnimations.forEach(function (animation) { animation.pause(); });
     document.body.setAttribute('data-scene', index + 1);
     var hint = byId('hint'), hintText = byId('hintText');
     if (hint && hintText) {
@@ -117,7 +117,7 @@
   }
   function schedule() {
     clearTimeout(timer);
-    if (paused || document.hidden) return;
+    if (paused) return;
     deadline = Date.now() + remaining;
     timer = setTimeout(advance, remaining);
   }
@@ -134,17 +134,6 @@
       if (event.code === 'Space' && event.target.tagName !== 'BUTTON') { event.preventDefault(); togglePause(); }
     });
   }
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) {
-      if (!paused) remaining = Math.max(0, deadline - Date.now());
-      clearTimeout(timer); document.body.classList.add('paused');
-      slideAnimations.forEach(function (animation) { animation.pause(); });
-    } else {
-      document.body.classList.toggle('paused', paused);
-      if (!paused) slideAnimations.forEach(function (animation) { animation.play(); });
-      schedule();
-    }
-  });
   function renderLoading() {
     var mapInfo = byId('mapInfo');
     if (mapInfo) mapInfo.textContent = state.map ? 'Map: ' + state.map : 'Detecting map';
