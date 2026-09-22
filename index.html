@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Z-FORK — Loading</title>
+  <link rel="stylesheet" href="style.css?v=15">
+</head>
+<body>
+  <main class="loading-screen" aria-label="Loading screen">
+    <div id="scenes" class="scenes" aria-hidden="true"></div>
+    <aside id="hint" class="hint" aria-live="polite">
+      <p><span class="hint-icon" aria-hidden="true">i</span><span id="hintText"></span></p>
+    </aside>
+    <div class="loading-info" aria-live="polite">
+      <span id="mapInfo">Detecting map</span>
+      <span class="spinner" aria-hidden="true"></span>
+    </div>
+  </main>
+  <audio id="music" src="assets/gta-v-loading-theme.mp3" autoplay loop preload="auto"></audio>
+  <script src="config.js?v=16"></script>
+  <script src="app.js?v=16"></script>
+</body>
+</html>
