@@ -25,15 +25,24 @@
     keys.forEach(function (key, n) { panel.style.setProperty(key, motions[scene.motion || 0][n]); });
     var painting = document.createElement('div'); painting.className = 'painting';
     var background = document.createElement('div'); background.className = 'background';
-    background.style.backgroundImage = 'url("' + scene.background + '")';
+    background.setAttribute('data-source', scene.background);
     painting.appendChild(background); panel.appendChild(painting);
     if (scene.foreground) {
-      var person = new Image(); person.className = 'foreground'; person.alt = ''; person.src = scene.foreground;
+      var person = new Image(); person.className = 'foreground'; person.alt = '';
+      person.setAttribute('data-source', scene.foreground);
       person.onerror = function () { person.hidden = true; }; panel.appendChild(person);
     }
     panels.push(panel); byId('scenes').appendChild(panel);
-    var preload = new Image(); preload.src = scene.background;
   });
+  function prepareScene(sceneIndex) {
+    var panel = panels[sceneIndex];
+    if (!panel || panel.getAttribute('data-loaded') === '1') return;
+    panel.setAttribute('data-loaded', '1');
+    var background = panel.querySelector('.background');
+    var person = panel.querySelector('.foreground');
+    if (background) background.style.backgroundImage = 'url("' + background.getAttribute('data-source') + '")';
+    if (person) person.src = person.getAttribute('data-source');
+  }
   function shuffledOrder(avoidFirst) {
     var result = scenes.map(function (_, sceneIndex) { return sceneIndex; });
     for (var n = result.length - 1; n > 0; n--) {
@@ -49,6 +58,7 @@
   function show(next) {
     if (sliding) return;
     index = (next + scenes.length) % scenes.length;
+    prepareScene(index);
     var panel = panels[index];
     if (panel === active) return;
     panel.querySelectorAll('.background,.foreground').forEach(function (layer) { layer.style.animation = 'none'; });
@@ -145,6 +155,7 @@
     return name.length > 42 ? name.slice(0, 39) + '…' : name;
   }
   window.GameDetails = function (name, url, map, maxPlayers, steamId, gamemode, volume) {
+    document.body.classList.add('gmod');
     state.server = name || config.serverName; state.map = map || '';
     document.title = state.server + ' — Loading';
     if (music && Number.isFinite(Number(volume))) {
@@ -169,5 +180,9 @@
   }
   order = shuffledOrder(-1); orderPosition = 0;
   renderLoading();
+  prepareScene(order[orderPosition]);
   show(order[orderPosition]);
+  setTimeout(function () {
+    if (order.length > 1) prepareScene(order[1]);
+  }, 1500);
 })();
