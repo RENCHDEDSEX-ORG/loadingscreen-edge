@@ -61,35 +61,36 @@
     var direction = transitionCount % 2 ? -1 : 1;
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var options = { duration: reduced ? 1 : transition, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'both' };
-    sliding = true;
-    var incoming;
-    if (previous) {
-      var outgoing = previous.animate([
+    // Garry's Mod can report its loading page as hidden and freeze Web Animations.
+    // In that mode, show the scene immediately instead of leaving it off-screen.
+    if (document.hidden || typeof panel.animate !== 'function') {
+      if (previous) previous.classList.remove('leaving');
+      slideAnimations = []; sliding = false;
+    } else {
+      sliding = true;
+      var outgoing = previous ? previous.animate([
         { transform: 'translate3d(0,0,0)' },
         { transform: 'translate3d(' + (direction * 110) + '%,0,0)' }
-      ], options);
-      incoming = panel.animate([
+      ], options) : null;
+      var incoming = panel.animate([
         { transform: 'translate3d(' + (-direction * 110) + '%,0,0)' },
         { transform: 'translate3d(0,0,0)' }
       ], options);
-      slideAnimations = [outgoing, incoming];
-      incoming.onfinish = function () {
-        previous.classList.remove('leaving');
-        outgoing.cancel(); incoming.cancel();
-        slideAnimations = []; sliding = false;
-      };
-    } else {
-      incoming = panel.animate([
-        { transform: 'translate3d(' + (-direction * 110) + '%,0,0)' },
-        { transform: 'translate3d(0,0,0)' }
-      ], options);
-      slideAnimations = [incoming];
-      incoming.onfinish = function () {
+      slideAnimations = outgoing ? [outgoing, incoming] : [incoming];
+      var finished = false;
+      var finishTransition = function () {
+        if (finished) return;
+        finished = true;
+        if (previous) previous.classList.remove('leaving');
+        if (outgoing) outgoing.cancel();
         incoming.cancel(); slideAnimations = []; sliding = false;
       };
+      incoming.onfinish = finishTransition;
+      // Some embedded CEF builds never fire onfinish; never leave a panel off-screen.
+      setTimeout(finishTransition, options.duration + 250);
+      if (paused) slideAnimations.forEach(function (animation) { animation.pause(); });
     }
     transitionCount++;
-    if (paused) slideAnimations.forEach(function (animation) { animation.pause(); });
     document.body.setAttribute('data-scene', index + 1);
     var hint = byId('hint'), hintText = byId('hintText');
     if (hint && hintText) {
