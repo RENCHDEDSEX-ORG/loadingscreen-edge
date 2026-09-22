@@ -1,5 +1,5 @@
 window.LOADING_CONFIG = {
-  serverName: 'Z-FORK',
+  serverName: 'EDGE',
   sceneDuration: 14000,
   transitionDuration: 650,
   musicVolume: 0.35,
